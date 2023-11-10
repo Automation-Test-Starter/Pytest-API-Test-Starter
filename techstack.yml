@@ -1,0 +1,18 @@
+repo_name: Automation-Test-Starter/Pytest-API-Test-Starter
+report_id: 1c2a877350ecc17651bc4b9d893a1cd6
+repo_type: Public
+timestamp: '2023-11-10T04:31:13+00:00'
+requested_by: dengnao-tw
+provider: github
+branch: main
+detected_tools_count: 1
+tools:
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source: Repo Metadata
