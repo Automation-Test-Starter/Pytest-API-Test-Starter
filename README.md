@@ -16,7 +16,7 @@ An introductory QuickStart project document on API automation testing with Pytes
   - [Project directory structure](#project-directory-structure)
   - [Build a Pytest API Automation Test Project from 0 to 1](#build-a-pytest-api-automation-test-project-from-0-to-1)
     - [1. Create a project directory](#1-create-a-project-directory)
-    - [2.项目初始化](#2项目初始化)
+    - [2.Project initialization](#2project-initialization)
     - [3.Install project dependencies](#3install-project-dependencies)
     - [4. Create new test files and test cases](#4-create-new-test-files-and-test-cases)
     - [5. Writing Test Cases](#5-writing-test-cases)
@@ -176,14 +176,14 @@ Pytest-allure-demo/
 mkdir Pytest-API-Testing-Demo
 ```
 
-### 2.项目初始化
+### 2.Project initialization
 
 ```shell
-// 进入项目文件夹下
+// Go to the project folder
 cd Pytest-API-Testing-Demo
-// 创建项目 python 项目虚拟环境
+// Create the project python project virtual environment
 python -m venv .env
-// 启用项目 python 项目虚拟环境
+// Enable the project python project virtual environment
 source .env/bin/activate
 ```
 
