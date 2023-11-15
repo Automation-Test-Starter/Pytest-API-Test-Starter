@@ -16,7 +16,7 @@ An introductory QuickStart project document on API automation testing with Pytes
   - [Project directory structure](#project-directory-structure)
   - [Build a Pytest API Automation Test Project from 0 to 1](#build-a-pytest-api-automation-test-project-from-0-to-1)
     - [1. Create a project directory](#1-create-a-project-directory)
-    - [2.项目初始化](#2项目初始化)
+    - [2.Project initialization](#2project-initialization)
     - [3.Install project dependencies](#3install-project-dependencies)
     - [4. Create new test files and test cases](#4-create-new-test-files-and-test-cases)
     - [5. Writing Test Cases](#5-writing-test-cases)
@@ -27,6 +27,9 @@ An introductory QuickStart project document on API automation testing with Pytes
       - [Configuring Test Report Parameters](#configuring-test-report-parameters)
       - [Run test cases](#run-test-cases)
       - [Viewing the test report](#viewing-the-test-report)
+  - [Advanced Usage](#advanced-usage)
+    - [CI/CD integration](#cicd-integration)
+      - [Integration github action](#integration-github-action)
 
 ## Introduction
 
@@ -176,14 +179,14 @@ Pytest-allure-demo/
 mkdir Pytest-API-Testing-Demo
 ```
 
-### 2.项目初始化
+### 2.Project initialization
 
 ```shell
-// 进入项目文件夹下
+// Go to the project folder
 cd Pytest-API-Testing-Demo
-// 创建项目 python 项目虚拟环境
+// Create the project python project virtual environment
 python -m venv .env
-// 启用项目 python 项目虚拟环境
+// Enable the project python project virtual environment
 source .env/bin/activate
 ```
 
@@ -284,3 +287,73 @@ pytest
 The report is located in the report directory in the project root directory, use your browser to open the pytest_html_report.html file to view it.
 
 ![8JdxbA](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/8JdxbA.png)
+
+## Advanced Usage
+
+### CI/CD integration
+
+#### Integration github action
+
+Use github action as an example, and other CI tools similarly
+
+See the demo at <https://github.com/Automation-Test-Starter/Pytest-API-Test-Demo>
+
+- Create the .github/workflows directory: In your GitHub repository, create a directory called .github/workflows. This will be where the GitHub Actions workflow files will be stored.
+
+- Create a workflow file: Create a YAML-formatted workflow file, such as pytest.yml, in the .github/workflows directory.
+
+- Edit the pytest.yml file: Copy the following into the file
+  
+```yaml
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Pytest API Testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  Pytes-API-Testing:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Test with pytest
+      run: |
+        pytest
+
+    - name: Archive Pytest test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: SuperTest-test-report
+        path: report
+          
+    - name: Upload Pytest report to GitHub
+      uses: actions/upload-artifact@v3
+      with:
+        name: Pytest-test-report
+        path: report
+```
+
+- Commit the code: Add the pytest.yml file to your repository and commit.
+- View test reports: In GitHub, navigate to your repository. Click the Actions tab at the top and then click the Pytest API Testing workflow on the left. You should see the workflow running, wait for the execution to complete and you can view the results.
+
+![yE65LO](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/yE65LO.png)
+
