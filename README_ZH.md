@@ -27,6 +27,9 @@
       - [配置测试报告参数](#配置测试报告参数)
       - [运行测试用例](#运行测试用例)
       - [查看测试报告](#查看测试报告)
+  - [进阶用法](#进阶用法)
+    - [持续集成](#持续集成)
+      - [接入 github action](#接入-github-action)
 
 ## 介绍
 
@@ -284,3 +287,73 @@ pytest
 报告在项目根目录下的 report 目录下，使用浏览器打开 pytest_html_report.html 文件即可查看
 
 ![8JdxbA](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/8JdxbA.png)
+
+## 进阶用法
+
+### 持续集成
+
+#### 接入 github action
+
+以 github action 为例，其他 CI 工具类似
+
+可参考 demo：<https://github.com/Automation-Test-Starter/Pytest-API-Test-Demo>
+
+创建.github/workflows 目录：在你的 GitHub 仓库中，创建一个名为 .github/workflows 的目录。这将是存放 GitHub Actions 工作流程文件的地方。
+
+创建工作流程文件：在.github/workflows 目录中创建一个 YAML 格式的工作流程文件，例如 pytest.yml。
+
+编辑 pytest.yml 文件：将以下内容复制到文件中
+  
+```yaml
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Pytest API Testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  Pytes-API-Testing:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Test with pytest
+      run: |
+        pytest
+
+    - name: Archive Pytest test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: SuperTest-test-report
+        path: report
+          
+    - name: Upload Pytest report to GitHub
+      uses: actions/upload-artifact@v3
+      with:
+        name: Pytest-test-report
+        path: report
+```
+
+- 提交代码：将 pytest.yml 文件添加到仓库中并提交。
+- 查看测试报告：在 GitHub 中，导航到你的仓库。单击上方的 Actions 选项卡，然后单击左侧的 Pytest API Testing 工作流。你应该会看到工作流正在运行，等待执行完成，就可以查看结果。
+
+![yE65LO](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/yE65LO.png)
+
