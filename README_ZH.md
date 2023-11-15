@@ -30,6 +30,7 @@
   - [进阶用法](#进阶用法)
     - [持续集成](#持续集成)
       - [接入 github action](#接入-github-action)
+    - [常用断言](#常用断言)
 
 ## 介绍
 
@@ -357,3 +358,172 @@ jobs:
 
 ![yE65LO](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/yE65LO.png)
 
+### 常用断言
+
+使用 Pytest 在接口自动化测试用例编写过程中，我们需要使用各种断言来验证测试的预期结果。
+
+Pytest 提供了更多的断言和灵活的断言库，以满足各种测试需求。
+
+以下是一些常用的 Pytest 接口自动化测试断言：
+
+- **相等性断言**：检查两个值是否相等。
+
+   ```python
+   assert actual_value == expected_value
+   ```
+
+- **不相等性断言**：检查两个值是否不相等。
+
+   ```python
+   assert actual_value != expected_value
+   ```
+
+- **包含断言**：检查一个值是否包含在另一个值中，通常用于检查字符串是否包含子字符串。
+
+   ```python
+   assert substring in full_string
+   ```
+
+- **成员资格断言**：检查一个值是否在集合、列表或其他可迭代对象中。
+
+   ```python
+   assert item in iterable
+   ```
+
+- **真值断言**：检查一个表达式或变量是否为真。
+
+   ```python
+   assert expression
+   ```
+
+   或
+
+   ```python
+   assert variable
+   ```
+
+- **假值断言**：检查一个表达式或变量是否为假。
+
+   ```python
+   assert not expression
+   ```
+
+   或
+
+   ```python
+   assert not variable
+   ```
+
+- **大于、小于、大于等于、小于等于断言**：检查一个值是否大于、小于、大于等于或小于等于另一个值。
+
+   ```python
+   assert value > other_value
+   assert value < other_value
+   assert value >= other_value
+   assert value <= other_value
+   ```
+
+- **类型断言**：检查一个值的类型是否符合预期。
+
+   ```python
+   assert isinstance(value, expected_type)
+   ```
+
+   例如，检查一个值是否是字符串：
+
+   ```python
+   assert isinstance(my_string, str)
+   ```
+
+- **异常断言**：检查在代码块中是否引发了特定类型的异常。
+
+   ```python
+   with pytest.raises(ExpectedException):
+       # 代码块，期望引发 ExpectedException 异常
+   ```
+
+- **近似相等断言**：检查两个浮点数是否在某个误差范围内相等。
+
+   ```python
+   assert math.isclose(actual_value, expected_value, rel_tol=1e-9)
+   ```
+
+- **列表相等断言**：检查两个列表是否相等。
+
+   ```python
+   assert actual_list == expected_list
+   ```
+
+- **字典相等断言**：检查两个字典是否相等。
+
+   ```python
+   assert actual_dict == expected_dict
+   ```
+
+- **正则表达式匹配断言**：检查一个字符串是否匹配给定的正则表达式。
+
+   ```python
+   import re
+
+   assert re.match(pattern, string)
+   ```
+
+- **空值断言**：检查一个值是否为 `None`。
+
+   ```python
+   assert value is None
+   ```
+
+- **非空值断言**：检查一个值是否不为 `None`。
+
+   ```python
+   assert value is not None
+   ```
+
+- **布尔值断言**：检查一个值是否为 `True` 或 `False`。
+
+   ```python
+   assert boolean_expression
+   ```
+
+- **空容器断言**：检查一个列表、集合或字典是否为空。
+
+   ```python
+   assert not container  # 检查容器是否为空
+   ```
+
+- **包含子集断言**：检查一个集合是否包含另一个集合作为子集。
+
+   ```python
+   assert subset <= full_set
+   ```
+
+- **字符串开头或结尾断言**：检查一个字符串是否以指定的前缀或后缀开头或结尾。
+
+    ```python
+    assert string.startswith(prefix)
+    assert string.endswith(suffix)
+    ```
+
+- **数量断言**：检查一个列表、集合或其他可迭代对象的元素数量。
+
+    ```python
+    assert len(iterable) == expected_length
+    ```
+
+- **范围断言**：检查一个值是否在指定的范围内。
+
+    ```python
+    assert lower_bound <= value <= upper_bound
+    ```
+
+- **文件存在断言**：检查文件是否存在。
+
+    ```python
+    import os
+
+    assert os.path.exists(file_path)
+    ```
+
+以上是一些 Pytest 常用的断言，但根据具体的测试需求，您可能会使用其他断言或结合多个断言来更全面地验证测试结果。
+详细的断言文档可以在 Pytest 官方网站找到：[Pytest - Built-in fixtures, marks, and nodes](https://docs.pytest.org/en/latest/reference.html#pytest)
