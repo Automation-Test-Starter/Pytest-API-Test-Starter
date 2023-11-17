@@ -881,9 +881,9 @@ def env_response_data(request):
     return response_data
 ```
 
-#### 更新测试用例来支持多环境
+#### Update test case to support multi environment
 
-> 为做区分，这里新建测试用例文件，文件名为 test_demo_multi_environment.py
+> To make a distinction, here is a new test case file named test_demo_multi_environment.py
 
 ```python
 import requests
