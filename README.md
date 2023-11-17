@@ -46,6 +46,14 @@ An introductory QuickStart project document on API automation testing with Pytes
       - [Configure fixture to support multiple environments](#configure-fixture-to-support-multiple-environments)
       - [Update test case to support multi environment](#update-test-case-to-support-multi-environment)
       - [Run this test case to confirm that multi-environment support is in effect](#run-this-test-case-to-confirm-that-multi-environment-support-is-in-effect)
+    - [Integration with allure reporting](#integration-with-allure-reporting)
+      - [Install allure-pytest library](#install-allure-pytest-library)
+      - [Configuration allure-pytest library](#configuration-allure-pytest-library)
+      - [Adjusting test cases to support allure reporting](#adjusting-test-cases-to-support-allure-reporting)
+      - [Run test cases to generate allure reports](#run-test-cases-to-generate-allure-reports)
+      - [View allure report](#view-allure-report)
+      - [Adapting CI/CD processes to support allure reporting](#adapting-cicd-processes-to-support-allure-reporting)
+      - [View github action allure report](#view-github-action-allure-report)
 
 ## Introduction
 
@@ -931,3 +939,155 @@ ENV=prod pytest test_case/test_demo_multi_environment.py
 ```
 
 ![2kITJT](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/2kITJT.png)
+
+### Integration with allure reporting
+
+allure is a lightweight, flexible, and easily extensible test reporting tool that provides a rich set of report types and features to help you better visualize your test results.
+
+allure reports can be integrated with Pytest to generate detailed test reports.
+
+Refer to the demo:<https://github.com/Automation-Test-Starter/Pytest-API-Test-Demo>
+
+#### Install allure-pytest library
+
+```shell
+pip install allure-pytest
+```
+
+> To avoid conflicts between the previously installed pytest-html-reporter and the allure-pytest package, it is recommended to uninstall the pytest-html-reporter package first.
+
+```shell
+pip uninstall pytest-html-reporter
+```
+
+#### Configuration allure-pytest library
+
+Update the pytest.ini file to specify where allure reports are stored
+
+```ini
+[pytest]
+# allure
+addopts = --alluredir ./allure-results
+```
+
+#### Adjusting test cases to support allure reporting
+
+> To differentiate, create a new test case file here, named test_demo_allure.py
+
+```python
+import allure
+import requests
+
+
+@allure.feature("Test example API")
+class TestPytestAllureDemo:
+
+    @allure.story("Test example get endpoint")
+    @allure.title("Verify the get API")
+    @allure.description("verify the get API response status code and data")
+    @allure.severity("blocker")
+    def test_get_example_endpoint_allure(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        get_api = env_config["getAPI"]
+        get_api_request_data = env_request_data["getAPI"]
+        get_api_response_data = env_response_data["getAPI"]
+        # send get request
+        response = requests.get(host + get_api)
+        # assert
+        print("response status code is" + str(response.status_code))
+        assert response.status_code == 200
+        print("response data is" + str(response.json()))
+        assert response.json() == get_api_response_data
+
+    @allure.story("Test example POST API")
+    @allure.title("Verify the POST API")
+    @allure.description("verify the POST API response status code and data")
+    @allure.severity("Critical")
+    def test_post_example_endpoint_allure(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        post_api = env_config["postAPI"]
+        post_api_request_data = env_request_data["postAPI"]
+        post_api_response_data = env_response_data["postAPI"]
+        # send request
+        response = requests.post(host + post_api, json=post_api_request_data)
+        # assert
+        print("response status code is" + str(response.status_code))
+        assert response.status_code == 201
+        print("response data is" + str(response.json()))
+        assert response.json() == post_api_response_data
+```
+
+#### Run test cases to generate allure reports
+
+```shell
+ENV=dev pytest test_case/test_demo_allure.py
+```
+
+#### View allure report
+
+Run the following command to view the allure report in the browser
+
+```shell
+allure serve allure-results
+```
+
+![Pr1E3W](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/Pr1E3W.png)
+
+![OsUO2e](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/OsUO2e.png)
+
+#### Adapting CI/CD processes to support allure reporting
+
+> Github action is an example, other CI tools are similar.
+
+Update the contents of the .github/workflows/pytest.yml file to upload allure reports to GitHub.
+
+```yaml
+name: Pytest API Testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  Pytes-API-Testing:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Test with pytest
+      run: |
+        ENV=dev pytest
+
+    - name: Archive Pytest allure test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: Pytest-allure-report
+        path: allure-results
+          
+    - name: Upload Pytest allure report to GitHub
+      uses: actions/upload-artifact@v3
+      with:
+        name: Pytest-allure-report
+        path: allure-results
+```
+
+#### View github action allure report
+
+In GitHub, navigate to your repository. Click the Actions tab at the top, and then click the Pytest API Testing workflow on the left. You should see the workflow running, wait for the execution to complete, and then you can view the results.
+
+![Lz2pPh](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/Lz2pPh.png)
