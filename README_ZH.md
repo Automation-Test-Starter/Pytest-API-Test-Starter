@@ -677,4 +677,8 @@ class TestPytestDemo:
 
 > 若用 demo 项目运行数据驱动支持测试用例：test_demo_data_driving.py，建议先屏蔽掉其他测试用例，否则可能会报错
 
+```shell
+  pytest tests/test_demo_data_driving.py
+```
+
 ![XQIPLf](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/XQIPLf.png)
