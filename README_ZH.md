@@ -38,6 +38,14 @@
       - [编写测试数据文件](#编写测试数据文件)
       - [更新测试用例来支持数据驱动](#更新测试用例来支持数据驱动)
       - [运行该测试用例确认数据驱动是否生效](#运行该测试用例确认数据驱动是否生效)
+    - [多环境支持](#多环境支持)
+      - [新建不同环境测试配置文件](#新建不同环境测试配置文件)
+      - [编写不同环境测试配置文件](#编写不同环境测试配置文件)
+      - [新建不同环境测试数据文件](#新建不同环境测试数据文件)
+      - [编写不同环境测试数据文件](#编写不同环境测试数据文件)
+      - [配置支持多环境的 fixture](#配置支持多环境的-fixture)
+      - [更新测试用例来支持多环境](#更新测试用例来支持多环境)
+      - [运行该测试用例确认多环境支持是否生效](#运行该测试用例确认多环境支持是否生效)
 
 ## 介绍
 
@@ -622,7 +630,7 @@ touch response_data.json
     "postAPI":{
       "title": "foo",
       "body": "bar",
-      "userId": 1,
+      "userId": "1",
       "id": 101
     }
 }
@@ -682,3 +690,243 @@ class TestPytestDemo:
 ```
 
 ![XQIPLf](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/XQIPLf.png)
+
+### 多环境支持
+
+在实际的 API 自动化测试过程中，我们需要在不同的环境中运行测试用例，以确保 API 在各个环境中都能正常运行。
+
+通过使用 Pytest 的 fixture 功能，我们可以轻松地实现多环境支持。
+
+可参考 demo：<https://github.com/Automation-Test-Starter/Pytest-API-Test-Demo>
+
+#### 新建不同环境测试配置文件
+
+> 配置文件会以 json 格式存储为例，其他格式如 YAML、CSV 等类似，均可参考
+
+```bash
+// 新建测试配置文件夹
+mkdir config
+// 进入测试配置文件夹 
+cd config
+// 新建开发环境测试配置文件
+touch dev_config.json
+// 新建生产环境测试配置文件
+touch prod_config.json
+```
+
+#### 编写不同环境测试配置文件
+
+- 编写开发环境测试配置文件
+
+> 根据实际情况配置开发环境测试配置文件
+
+```json
+{
+  "host": "https://jsonplaceholder.typicode.com",
+  "getAPI": "/posts/1",
+  "postAPI":"/posts"
+}
+```
+
+- 编写生产环境测试配置文件
+
+> 根据实际情况配置生产环境测试配置文件
+
+```json
+{
+  "host": "https://jsonplaceholder.typicode.com",
+  "getAPI": "/posts/1",
+  "postAPI":"/posts"
+}
+```
+
+#### 新建不同环境测试数据文件
+
+> 不同环境请求数据文件和响应数据文件分别存储测试用例的不同环境请求数据和不同环境预期响应数据。
+
+```bash
+// 新建测试数据文件夹
+mkdir data
+// 进入测试数据文件夹
+cd data
+// 新建开发环境请求数据文件
+touch dev_request_data.json
+// 新建开发环境响应数据文件
+touch dev_response_data.json
+// 新建生产环境请求数据文件
+touch prod_request_data.json
+// 新建生产环境响应数据文件
+touch prod_response_data.json
+```
+
+#### 编写不同环境测试数据文件
+
+- 编写开发环境请求数据文件
+
+> 开发环境请求数据文件中配置了 getAPI 接口的请求数据和 postAPI 接口的请求数据
+
+```json
+{
+  "getAPI": "",
+  "postAPI":{
+    "title": "foo",
+    "body": "bar",
+    "userId": 1
+  }
+}
+```
+
+- 编写开发环境响应数据文件
+
+> 开发环境响应数据文件中配置了 getAPI 接口的响应数据和 postAPI 接口的响应数据
+
+```json
+{
+    "getAPI": {
+      "userId": 1,
+      "id": 1,
+      "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+    },
+    "postAPI":{
+      "title": "foo",
+      "body": "bar",
+      "userId": 1,
+      "id": 101
+    }
+}
+```
+
+- 编写生产环境请求数据文件
+
+> 生产环境请求数据文件中配置了 getAPI 接口的请求数据和 postAPI 接口的请求数据
+
+```json
+{
+  "getAPI": "",
+  "postAPI":{
+    "title": "foo",
+    "body": "bar",
+    "userId": 1
+  }
+}
+```
+
+- 编写生产环境响应数据文件
+
+> 生产环境响应数据文件中配置了 getAPI 接口的响应数据和 postAPI 接口的响应数据
+
+```json
+{
+    "getAPI": {
+      "userId": 1,
+      "id": 1,
+      "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+    },
+    "postAPI":{
+      "title": "foo",
+      "body": "bar",
+      "userId": 1,
+      "id": 101
+    }
+}
+```
+
+#### 配置支持多环境的 fixture
+
+> fixture 会以 conftest.py 文件存储为例，其他格式如 YAML、CSV 等类似，均可参考
+
+- 项目根目录新建 conftest.py 文件
+
+```bash
+ mkdrir conftest.py
+```
+
+- 编写 conftest.py 文件
+
+```python
+
+import pytest
+import json
+import json
+import os
+
+
+@pytest.fixture(scope="session")
+def env_config(request):
+    # get config file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'config/{env}_config.json', 'r') as config_file:
+        config = json.load(config_file)
+    return config
+
+
+@pytest.fixture(scope="session")
+def env_request_data(request):
+    # get request data file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'data/{env}_request_data.json', 'r') as request_data_file:
+        request_data = json.load(request_data_file)
+    return request_data
+
+
+@pytest.fixture (scope="session")
+def env_response_data(request):
+    # get response data file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'data/{env}_response_data.json', 'r') as response_data_file:
+        response_data = json.load(response_data_file)
+    return response_data
+```
+
+#### 更新测试用例来支持多环境
+
+> 为做区分，这里新建测试用例文件，文件名为 test_demo_multi_environment.py
+
+```python
+import requests
+import json
+
+
+class TestPytestMultiEnvDemo:
+
+    def test_get_demo_multi_env(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        get_api = env_config["getAPI"]
+        get_api_response_data = env_response_data["getAPI"]
+        # send request
+        response = requests.get(host+get_api)
+        # assert
+        assert response.status_code == 200
+        assert response.json() == get_api_response_data
+
+    def test_post_demo_multi_env(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        post_api = env_config["postAPI"]
+        post_api_request_data = env_request_data["postAPI"]
+        post_api_response_data = env_response_data["postAPI"]
+        # send request
+        response = requests.post(host + post_api, post_api_request_data)
+        # assert
+        assert response.status_code == 201
+        assert response.json() == post_api_response_data
+```
+
+#### 运行该测试用例确认多环境支持是否生效
+
+- 运行开发环境测试用例
+
+```shell
+ENV=dev pytest test_case/test_demo_multi_environment.py
+```
+
+![Wb0owW](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/Wb0owW.png)
+
+- 运行生产环境测试用例
+
+```shell
+ENV=prod pytest test_case/test_demo_multi_environment.py
+```
+
+![2kITJT](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/2kITJT.png)
