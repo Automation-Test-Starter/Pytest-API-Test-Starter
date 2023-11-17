@@ -38,6 +38,14 @@ An introductory QuickStart project document on API automation testing with Pytes
       - [Writing test data files](#writing-test-data-files)
       - [Updating test cases to support data driving](#updating-test-cases-to-support-data-driving)
       - [Run the test case to confirm the data driver is working](#run-the-test-case-to-confirm-the-data-driver-is-working)
+    - [Multi-environment support](#multi-environment-support)
+      - [New test configuration files for different environments](#new-test-configuration-files-for-different-environments)
+      - [Writing different environment test profiles](#writing-different-environment-test-profiles)
+      - [New Different Environment Test Data File](#new-different-environment-test-data-file)
+      - [Writing test data files for different environments](#writing-test-data-files-for-different-environments)
+      - [Configure fixture to support multiple environments](#configure-fixture-to-support-multiple-environments)
+      - [更新测试用例来支持多环境](#更新测试用例来支持多环境)
+      - [Run this test case to confirm that multi-environment support is in effect](#run-this-test-case-to-confirm-that-multi-environment-support-is-in-effect)
 
 ## Introduction
 
@@ -683,3 +691,243 @@ class TestPytestDemo:
 ```
 
 ![XQIPLf](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/XQIPLf.png)
+
+### Multi-environment support
+
+In the actual API automation testing process, we need to run test cases in different environments to ensure that the API works properly in each environment.
+
+By using Pytest's fixture feature, we can easily support multiple environments.
+
+Refer to the demo:<https://github.com/Automation-Test-Starter/Pytest-API-Test-Demo>
+
+#### New test configuration files for different environments
+
+> Configuration file will be stored in json format for example, other formats such as YAML, CSV, etc. are similar, can refer to the
+
+```bash
+// Create a new test configuration folder
+mkdir config
+// Go to the test configuration folder 
+cd config
+// Create a new test configuration file for the development environment
+touch dev_config.json
+// Create a new test configuration file for the production environment
+touch prod_config.json
+```
+
+#### Writing different environment test profiles
+
+- Writing Development Environment Test Profiles
+
+> Configure the development environment test profiles according to the actual situation.
+
+```json
+{
+  "host": "https://jsonplaceholder.typicode.com",
+  "getAPI": "/posts/1",
+  "postAPI":"/posts"
+}
+```
+
+- Configuring Production Environment Test Profiles
+
+> Configure production environment test profiles according to the actual situation
+
+```json
+{
+  "host": "https://jsonplaceholder.typicode.com",
+  "getAPI": "/posts/1",
+  "postAPI":"/posts"
+}
+```
+
+#### New Different Environment Test Data File
+
+> The different environments request data file and the response data file store the different environments request data and the different environments expected response data for the test cases, respectively.
+
+```bash
+// Create a new test data folder
+mkdir data
+// Go to the test data folder
+cd data
+// Create a new dev request data file
+touch dev_request_data.json
+// Create a new dev response data file
+touch dev_response_data.json 
+// Create a new request data file for the production environment
+touch prod_request_data.json 
+// Create a new production response data file
+touch prod_response_data.json 
+```
+
+#### Writing test data files for different environments
+
+- Write the dev environment request data file
+
+> The dev environment request data file is configured with the request data for the getAPI API and the request data for the postAPI API.
+
+```json
+{
+  "getAPI": "",
+  "postAPI":{
+    "title": "foo",
+    "body": "bar",
+    "userId": 1
+  }
+}
+```
+
+- Writing the dev Environment Response Data File
+
+> The dev environment response data file is configured with the response data for the getAPI API and the response data for the postAPI API.
+
+```json
+{
+    "getAPI": {
+      "userId": 1,
+      "id": 1,
+      "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+    },
+    "postAPI":{
+      "title": "foo",
+      "body": "bar",
+      "userId": 1,
+      "id": 101
+    }
+}
+```
+
+- Write the prod environment request data file
+
+> The prod environment request data file is configured with the request data for the getAPI API and the request data for the postAPI API.
+
+```json
+{
+  "getAPI": "",
+  "postAPI":{
+    "title": "foo",
+    "body": "bar",
+    "userId": 1
+  }
+}
+```
+
+- Writing the prod Environment Response Data File
+
+> The prod environment response data file is configured with the response data for the getAPI API and the response data for the postAPI API.
+
+```json
+{
+    "getAPI": {
+      "userId": 1,
+      "id": 1,
+      "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+      "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+    },
+    "postAPI":{
+      "title": "foo",
+      "body": "bar",
+      "userId": 1,
+      "id": 101
+    }
+}
+```
+
+#### Configure fixture to support multiple environments
+
+The > fixture will be stored in the conftest.py file as an example, other formats such as YAML, CSV, etc. are similar.
+
+- Create a new conftest.py file in the project root directory.
+
+```bash
+ mkdrir conftest.py
+```
+
+- Writing the conftest.py file
+
+```python
+
+import pytest
+import json
+import json
+import os
+
+
+@pytest.fixture(scope="session")
+def env_config(request):
+    # get config file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'config/{env}_config.json', 'r') as config_file:
+        config = json.load(config_file)
+    return config
+
+
+@pytest.fixture(scope="session")
+def env_request_data(request):
+    # get request data file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'data/{env}_request_data.json', 'r') as request_data_file:
+        request_data = json.load(request_data_file)
+    return request_data
+
+
+@pytest.fixture (scope="session")
+def env_response_data(request):
+    # get response data file from different env
+    env = os.getenv('ENV', 'dev')
+    with open(f'data/{env}_response_data.json', 'r') as response_data_file:
+        response_data = json.load(response_data_file)
+    return response_data
+```
+
+#### Update test case to support multi environment
+
+> To make a distinction, here is a new test case file named test_demo_multi_environment.py
+
+```python
+import requests
+import json
+
+
+class TestPytestMultiEnvDemo:
+
+    def test_get_demo_multi_env(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        get_api = env_config["getAPI"]
+        get_api_response_data = env_response_data["getAPI"]
+        # send request
+        response = requests.get(host+get_api)
+        # assert
+        assert response.status_code == 200
+        assert response.json() == get_api_response_data
+
+    def test_post_demo_multi_env(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        post_api = env_config["postAPI"]
+        post_api_request_data = env_request_data["postAPI"]
+        post_api_response_data = env_response_data["postAPI"]
+        # send request
+        response = requests.post(host + post_api, post_api_request_data)
+        # assert
+        assert response.status_code == 201
+        assert response.json() == post_api_response_data
+```
+
+#### Run this test case to confirm that multi-environment support is in effect
+
+- Run the dev environment test case
+
+```shell
+ENV=dev pytest test_case/test_demo_multi_environment.py
+```
+
+![Wb0owW](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/Wb0owW.png)
+
+- Run the prod environment test case
+
+```shell
+ENV=prod pytest test_case/test_demo_multi_environment.py
+```
+
+![2kITJT](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/2kITJT.png)
