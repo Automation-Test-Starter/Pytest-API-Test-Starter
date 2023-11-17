@@ -44,7 +44,7 @@ An introductory QuickStart project document on API automation testing with Pytes
       - [New Different Environment Test Data File](#new-different-environment-test-data-file)
       - [Writing test data files for different environments](#writing-test-data-files-for-different-environments)
       - [Configure fixture to support multiple environments](#configure-fixture-to-support-multiple-environments)
-      - [更新测试用例来支持多环境](#更新测试用例来支持多环境)
+      - [Update test case to support multi environment](#update-test-case-to-support-multi-environment)
       - [Run this test case to confirm that multi-environment support is in effect](#run-this-test-case-to-confirm-that-multi-environment-support-is-in-effect)
 
 ## Introduction
