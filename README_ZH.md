@@ -54,6 +54,11 @@
       - [查看 allure 报告](#查看-allure-报告)
       - [调整 CI/CD 流程来支持 allure 报告](#调整-cicd-流程来支持-allure-报告)
       - [查看 github action allure 报告](#查看-github-action-allure-报告)
+    - [并发测试和分布式测试](#并发测试和分布式测试)
+      - [`pytest-xdist` 功能介绍](#pytest-xdist-功能介绍)
+      - [安装 `pytest-xdist` 依赖](#安装-pytest-xdist-依赖)
+      - [并发运行测试用例示例](#并发运行测试用例示例)
+      - [分布式测试示例](#分布式测试示例)
 
 ## 介绍
 
@@ -1090,3 +1095,111 @@ jobs:
 在 GitHub 中，导航到你的仓库。单击上方的 Actions 选项卡，然后单击左侧的 Pytest API Testing 工作流。你应该会看到工作流正在运行，等待执行完成，就可以查看结果。
 
 ![Lz2pPh](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/Lz2pPh.png)
+
+### 并发测试和分布式测试
+
+在日常的接口自动化测试过程中，需要并发执行测试用例，以提高测试效率。
+
+有时候也需要引入分布式测试，以便在多台机器上同时运行测试用例，也能更好的提升测试效率。
+
+`pytest-xdist` 是 Pytest 的一个插件，能提供了一些对应的功能，主要用于支持并发测试和分布式测试。
+
+#### `pytest-xdist` 功能介绍
+
+1. **并发执行测试**：
+   - 使用 `-n` 选项：`pytest -n NUM` 允许并发运行测试，其中 `NUM` 是并发工作者的数量。这可以加速测试执行，特别是在拥有多个 CPU 内核的计算机上。
+
+   ```bash
+   pytest -n 3  # 启动 3 个并发工作者执行测试
+   ```
+
+2. **分布式测试**：
+   - 使用 `pytest --dist=loadscope`：允许在多个节点上执行测试，通过分布式测试可以更快地完成测试运行。
+
+   ```bash
+   pytest --dist=loadscope
+   ```
+
+   - 使用 `pytest --dist=each`：每个节点运行一组测试，适用于分布式测试。
+
+   ```bash
+   pytest --dist=each
+   ```
+
+3. **参数化测试和并发**：
+   - 使用 `pytest.mark.run`：结合 `pytest.mark.run` 标记，可以选择在不同的进程或节点上运行具有不同标记的测试。
+
+   ```python
+   @pytest.mark.run(processes=2)
+   def test_example():
+       pass
+   ```
+
+4. **分布式环境设置**：
+   - 使用 `pytest_configure_node`：可以在节点上运行测试之前进行配置。
+
+   ```python
+   def pytest_configure_node(node):
+       node.slaveinput['my_option'] = 'some value'
+   ```
+
+   - 使用 `pytest_configure_node`：可以在节点上运行测试之前进行配置。
+
+   ```python
+   def pytest_configure_node(node):
+       node.slaveinput['my_option'] = 'some value'
+   ```
+
+5. **分布式测试环境销毁**：
+   - 使用 `pytest_configure_node`：可以在节点上运行测试之后进行清理。
+
+   ```python
+   def pytest_configure_node(node):
+       # 配置节点
+       yield
+
+       # 在节点上运行测试后执行清理
+       print("Cleaning up after test run on node %s" % node.gateway.id)
+   ```
+
+这些是 `pytest-xdist` 提供的一些功能，可以帮助您更有效地执行并发测试和分布式测试，以加速测试执行并提高效率。确保在使用前查阅 `pytest-xdist` 的文档以获取更详细的信息和用法示例。
+
+#### 安装 `pytest-xdist` 依赖
+
+```shell
+pip install pytest-xdist
+```
+
+#### 并发运行测试用例示例
+
+- 并发 3 个测试工作者执行测试用例
+
+```shell
+pytest -n 3
+```
+
+- 并发 3 个测试工作者执行测试用例，并且每个测试工作者都会打印测试用例的进度
+
+```shell
+pytest -n 3 -v
+```
+
+#### 分布式测试示例
+
+- 分布式测试，每个节点运行一组测试
+
+```shell
+pytest --dist=each
+```
+
+- 分布式测试，每个节点运行一组测试，并且每个测试工作者都会打印测试用例的进度
+
+```shell
+pytest --dist=each -v
+```
+
+- 分布式测试，每个节点运行一组测试，并且每个测试工作者都会打印测试用例的进度，同时打印测试用例的进度
+
+```shell
+pytest --dist=each -v --capture=no
+```
