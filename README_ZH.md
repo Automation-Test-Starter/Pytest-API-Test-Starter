@@ -58,7 +58,16 @@
       - [`pytest-xdist` 功能介绍](#pytest-xdist-功能介绍)
       - [安装 `pytest-xdist` 依赖](#安装-pytest-xdist-依赖)
       - [并发运行测试用例示例](#并发运行测试用例示例)
+        - [并发 3 个 worker 执行测试用例](#并发-3-个-worker-执行测试用例)
+        - [并发 3 个 worker 执行测试用例，并且每个 worker 都会打印测试用例的进度](#并发-3-个-worker-执行测试用例并且每个-worker-都会打印测试用例的进度)
       - [分布式测试示例](#分布式测试示例)
+        - [分布式测试，每个节点运行一组测试](#分布式测试每个节点运行一组测试)
+        - [分布式测试，每个节点运行一组测试，并且每个 worker 都会打印测试用例的进度](#分布式测试每个节点运行一组测试并且每个-worker-都会打印测试用例的进度)
+        - [分布式测试，每个节点运行一组测试，并且每个 worker 都会打印测试用例的进度，同时打印测试日志的输出](#分布式测试每个节点运行一组测试并且每个-worker-都会打印测试用例的进度同时打印测试日志的输出)
+    - [筛选用例执行](#筛选用例执行)
+      - [定义 Pytest 标记](#定义-pytest-标记)
+      - [标记用例](#标记用例)
+      - [筛选测试用例执行](#筛选测试用例执行)
 
 ## 介绍
 
@@ -1107,10 +1116,10 @@ jobs:
 #### `pytest-xdist` 功能介绍
 
 1. **并发执行测试**：
-   - 使用 `-n` 选项：`pytest -n NUM` 允许并发运行测试，其中 `NUM` 是并发工作者的数量。这可以加速测试执行，特别是在拥有多个 CPU 内核的计算机上。
+   - 使用 `-n` 选项：`pytest -n NUM` 允许并发运行测试，其中 `NUM` 是并发 worker 的数量。这可以加速测试执行，特别是在拥有多个 CPU 内核的计算机上。
 
    ```bash
-   pytest -n 3  # 启动 3 个并发工作者执行测试
+   pytest -n 3  # 启动 3 个并发 worker 执行测试
    ```
 
 2. **分布式测试**：
@@ -1172,34 +1181,154 @@ pip install pytest-xdist
 
 #### 并发运行测试用例示例
 
-- 并发 3 个测试工作者执行测试用例
+##### 并发 3 个 worker 执行测试用例
+
+分别运行以下命令，查看测试用例的执行时长
+
+- 并发执行
 
 ```shell
 pytest -n 3
 ```
 
-- 并发 3 个测试工作者执行测试用例，并且每个测试工作者都会打印测试用例的进度
+![LKHRct](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/LKHRct.png)
+
+- 默认串行执行
+
+```shell
+pytest
+```
+
+![5y442s](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/5y442s.png)
+
+`串行执行耗时 9.81s`，而`并发执行耗时 1.63s`，可以看到并发执行测试用例可以大大提高测试效率。
+
+##### 并发 3 个 worker 执行测试用例，并且每个 worker 都会打印测试用例的进度
 
 ```shell
 pytest -n 3 -v
 ```
 
+![5krJia](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/5krJia.png)
+
+测试结果中会打印测试进度，可以更好的了解测试用例的执行情况。
+
 #### 分布式测试示例
 
-- 分布式测试，每个节点运行一组测试
+##### 分布式测试，每个节点运行一组测试
 
 ```shell
 pytest --dist=each
 ```
 
-- 分布式测试，每个节点运行一组测试，并且每个测试工作者都会打印测试用例的进度
+![W1akqS](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/W1akqS.png)
+
+分布式测试可以更快地完成测试运行。
+
+##### 分布式测试，每个节点运行一组测试，并且每个 worker 都会打印测试用例的进度
 
 ```shell
 pytest --dist=each -v
 ```
 
-- 分布式测试，每个节点运行一组测试，并且每个测试工作者都会打印测试用例的进度，同时打印测试用例的进度
+![sMlawH](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/sMlawH.png)
+
+测试结果中会打印测试进度，可以更好的了解测试用例的执行情况。
+
+##### 分布式测试，每个节点运行一组测试，并且每个 worker 都会打印测试用例的进度，同时打印测试日志的输出
 
 ```shell
 pytest --dist=each -v --capture=no
 ```
+
+![RkNSDb](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/RkNSDb.png)
+
+测试结果中会打印测试日志的输出，可以更好的了解测试用例的执行情况。
+
+### 筛选用例执行
+
+在日常的接口测试过程中，我们需要根据实际情况来选择性地执行测试用例，以提高测试效率。
+
+一般我们使用 allure 测试报告的时候，可以使用 Allure 标签特性来进行筛选对应标签的的用例来执行测试，但 Pytest 框架不直接支持运行基于 Allure 标签的测试。所以可以使用 Pytest 标记来实现这一点。
+
+Pytest 提供 `marks`标记功能可以用来标记不同类型的测试用例，然后进行筛选对应类型的测试用例进行执行。
+
+大致流程为你可以用自定义标记（如 Regression/Smoke）来标记测试，然后使用 pytest 的 -m 选项只运行这些测试。
+
+#### 定义 Pytest 标记
+
+编辑 pytest.ini 文件，添加以下内容：自定义标记的类型
+
+- Regression:标记为回归测试的用例
+- Smoke:标记为冒烟测试的用例
+
+```ini
+markers =
+    Regression: marks tests as Regression
+    Smoke: marks tests as Smoke
+```
+
+#### 标记用例
+
+操作步骤为：
+
+- 引入 pytest
+- 使用 `@pytest.mark` 标记测试用例
+
+> 为做区分，这里新建测试用例文件，文件名为 test_demo_filter.py
+
+```python
+import pytest
+import requests
+import json
+
+
+class TestPytestMultiEnvDemo:
+
+    @pytest.mark.Regression  # mark the test case as regression
+    def test_get_demo_filter(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        get_api = env_config["getAPI"]
+        get_api_response_data = env_response_data["getAPI"]
+        # send request
+        response = requests.get(host+get_api)
+        # assert
+        assert response.status_code == 200
+        assert response.json() == get_api_response_data
+
+    @pytest.mark.Smoke  # mark the test case as smoke
+    def test_post_demo_filter(self, env_config, env_request_data, env_response_data):
+        host = env_config["host"]
+        post_api = env_config["postAPI"]
+        post_api_request_data = env_request_data["postAPI"]
+        print("make the request")
+        post_api_response_data = env_response_data["postAPI"]
+        # Your test code here
+        response = requests.post(host + post_api, json=post_api_request_data)
+        print("verify the response status code")
+        assert response.status_code == 201
+        print("verify the response data")
+        assert response.json() == post_api_response_data
+```
+
+#### 筛选测试用例执行
+
+- 运行 Regression 标记的测试用例
+
+```shell
+pytest -m Regression
+```
+
+这条命令告诉 pytest 只运行标有 Regression 的测试。
+
+![d8dMGa](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/d8dMGa.png)
+
+- 运行 Smoke 标记的测试用例
+
+```shell
+pytest -m Smoke
+```
+
+这条命令告诉 pytest 只运行标有 Smoke 的测试。
+
+![2023112014VOVT3v](https://cdn.jsdelivr.net/gh/naodeng/blogimg@master/uPic/2023112014VOVT3v.png)
